@@ -8,11 +8,11 @@
         Devices
       </h1>
       <span class="record-count" *ngIf="!loading()">
-        {{ users().length }} Records
+        {{ devices().length }} Records
       </span>
     </div>
     <div class="header-right">
-      <button class="add-btn">
+      <button class="add-btn" (click)="openAddModal()">
         <i class="pi pi-plus"></i>
         Add Device
       </button>
@@ -29,83 +29,66 @@
         <input type="text" class="search-input" placeholder="Search devices..." (input)="onGlobalFilter(dt, $event)" />
       </div>
       <div class="toolbar-right">
-        <button class="icon-btn" title="Refresh">
+        <button class="icon-btn" title="Refresh" (click)="loadDevices()">
           <i class="pi pi-refresh"></i>
-        </button>
-        <button class="icon-btn" title="Filter">
-          <i class="pi pi-filter"></i>
         </button>
       </div>
     </div>
 
     <!-- PrimeNG Table -->
-    <p-table #dt [value]="users()" [loading]="loading()" [paginator]="true" [rows]="10"
-      [rowsPerPageOptions]="[5, 10, 20]"
-      [globalFilterFields]="['name','username','email','address.street','phone','company.name']" [sortMode]="'multiple'"
-      [scrollable]="true" styleClass="custom-prime-table" [tableStyle]="{ 'min-width': '60rem' }"
-      [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+    <p-table #dt [value]="devices()" [loading]="loading()" [paginator]="true" [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 20]" [globalFilterFields]="['name','username','email','street','phone','company']"
+      [sortMode]="'multiple'" [scrollable]="true" styleClass="custom-prime-table"
+      [tableStyle]="{ 'min-width': '60rem' }" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+
       <ng-template pTemplate="header">
         <tr>
           <th class="col-serial">#</th>
-          <th pSortableColumn="name">
-            Name <p-sortIcon field="name" />
-          </th>
-          <th pSortableColumn="username">
-            Username <p-sortIcon field="username" />
-          </th>
-          <th pSortableColumn="email">
-            Email <p-sortIcon field="email" />
-          </th>
-          <th pSortableColumn="address.street">
-            Street <p-sortIcon field="address.street" />
-          </th>
-          <th pSortableColumn="phone">
-            Phone <p-sortIcon field="phone" />
-          </th>
-          <th pSortableColumn="company.name">
-            Company Name <p-sortIcon field="company.name" />
-          </th>
+          <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+          <th pSortableColumn="username">Username <p-sortIcon field="username" /></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email" /></th>
+          <th pSortableColumn="street">Street <p-sortIcon field="street" /></th>
+          <th pSortableColumn="phone">Phone <p-sortIcon field="phone" /></th>
+          <th pSortableColumn="company">Company <p-sortIcon field="company" /></th>
           <th>Actions</th>
         </tr>
       </ng-template>
 
-      <ng-template pTemplate="body" let-user let-rowIndex="rowIndex">
+      <ng-template pTemplate="body" let-device let-rowIndex="rowIndex">
         <tr class="table-row">
           <td>
             <span class="serial-badge">{{ rowIndex + 1 }}</span>
           </td>
           <td>
             <div class="user-info">
-              <div class="avatar">{{ user.name.charAt(0) }}</div>
-              <span class="user-name">{{ user.name }}</span>
+              <div class="avatar">{{ device.name.charAt(0) }}</div>
+              <span class="user-name">{{ device.name }}</span>
             </div>
           </td>
           <td>
-            <span class="username-tag">&#64;{{ user.username }}</span>
+            <span class="username-tag">&#64;{{ device.username }}</span>
           </td>
           <td>
-            <a [href]="'mailto:' + user.email" class="email-link">
-              {{ user.email }}
+            <a [href]="'mailto:' + device.email" class="email-link">
+              {{ device.email }}
             </a>
           </td>
           <td>
-            <span class="street-text">{{ user.address.street }}</span>
+            <span class="street-text">{{ device.street }}</span>
           </td>
           <td>
-            <span class="phone-text">{{ user.phone }}</span>
+            <span class="phone-text">{{ device.phone }}</span>
           </td>
           <td>
-            <span class="company-badge">{{ user.company.name }}</span>
+            <span class="company-badge">{{ device.company }}</span>
           </td>
           <td>
             <div class="action-btns">
-              <button class="action-btn" title="View">
-                <i class="pi pi-eye"></i>
-              </button>
-              <button class="action-btn" title="Edit">
+              <button class="action-btn edit-btn" title="Edit" (click)="openEditModal(device)">
                 <i class="pi pi-pencil"></i>
               </button>
-              <button class="action-btn" title="Delete">
+              <button class="action-btn delete-btn" title="Delete" (click)="confirmDelete(device)">
                 <i class="pi pi-trash"></i>
               </button>
             </div>
@@ -134,5 +117,94 @@
       </ng-template>
     </p-table>
 
+  </div>
+</div>
+
+<!-- =============================================
+     ADD / EDIT MODAL OVERLAY
+     ============================================= -->
+<div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-title">
+        <i class="pi" [ngClass]="isEditMode() ? 'pi-pencil' : 'pi-plus-circle'"></i>
+        {{ isEditMode() ? 'Edit Device' : 'Add New Device' }}
+      </div>
+      <button class="modal-close-btn" (click)="closeModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label class="form-label">Name <span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="Enter name" [(ngModel)]="formData.name" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Username <span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="Enter username" [(ngModel)]="formData.username" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email <span class="required">*</span></label>
+          <input type="email" class="form-input" placeholder="Enter email" [(ngModel)]="formData.email" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Street <span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="Enter street" [(ngModel)]="formData.street" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone <span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="Enter phone" [(ngModel)]="formData.phone" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Company <span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="Enter company" [(ngModel)]="formData.company" />
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+      <button class="btn-save" (click)="saveDevice()" [disabled]="!isFormValid() || modalLoading()">
+        <i class="pi" [ngClass]="modalLoading() ? 'pi-spin pi-spinner' : (isEditMode() ? 'pi-check' : 'pi-plus')"></i>
+        {{ modalLoading() ? 'Saving...' : (isEditMode() ? 'Update Device' : 'Add Device') }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =============================================
+     DELETE CONFIRM DIALOG
+     ============================================= -->
+<div class="modal-overlay" *ngIf="showDeleteConfirm()" (click)="closeDeleteConfirm()">
+  <div class="confirm-card" (click)="$event.stopPropagation()">
+    <div class="confirm-icon">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title">Delete Device</h3>
+    <p class="confirm-message">
+      Are you sure you want to delete <strong>{{ deviceToDelete()?.name }}</strong>?
+      This action cannot be undone.
+    </p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="closeDeleteConfirm()">Cancel</button>
+      <button class="btn-delete" (click)="executeDelete()" [disabled]="deleteLoading()">
+        <i class="pi" [ngClass]="deleteLoading() ? 'pi-spin pi-spinner' : 'pi-trash'"></i>
+        {{ deleteLoading() ? 'Deleting...' : 'Yes, Delete' }}
+      </button>
+    </div>
   </div>
 </div>

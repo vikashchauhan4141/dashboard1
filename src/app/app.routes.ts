@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { Dashboard } from './pages/dashboard/dashboard';
-import { Devices } from './pages/devices/devices';
 
 export const routes: Routes = [
   {
@@ -10,11 +8,13 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    component: Dashboard,
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard').then((m) => m.Dashboard),
   },
   {
     path: 'devices',
-    component: Devices,
+    loadComponent: () =>
+      import('./pages/devices/devices').then((m) => m.Devices),
   },
   {
     path: '**',
