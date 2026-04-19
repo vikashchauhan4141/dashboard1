@@ -1,7 +1,31 @@
 :host {
   display: block;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.app-content {
-  min-height: calc(100vh - 82px);
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 240px;
+  min-height: 100vh;
+  overflow-y: auto;
+  background: #f0f2f5;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-collapsed .main-content {
+  margin-left: 64px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 64px;
+  }
 }

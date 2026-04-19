@@ -1,5 +1,6 @@
-<app-navbar></app-navbar>
-
-<main class="app-content container-fluid py-3">
-  <router-outlet />
-</main>
+<div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed">
+  <app-sidebar [isCollapsed]="sidebarCollapsed" (toggleCollapse)="onSidebarToggle()"></app-sidebar>
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>

@@ -1,0 +1,61 @@
+<nav class="sidebar" [class.collapsed]="isCollapsed">
+
+  <!-- ── Brand / Logo ───────────────────────────────────── -->
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <i class="pi pi-th-large"></i>
+    </div>
+    <span class="brand-name" *ngIf="!isCollapsed">Dashboard</span>
+  </div>
+
+  <!-- ── Nav Items ──────────────────────────────────────── -->
+  <ul class="nav-list">
+    <li *ngFor="let item of navItems" class="nav-item" [title]="isCollapsed ? item.label : ''">
+      <a
+        class="nav-link"
+        [routerLink]="[item.route]"
+        routerLinkActive="active"
+        (click)="closeOnLinkClick()"
+      >
+        <span class="nav-icon"><i class="pi" [ngClass]="item.icon"></i></span>
+        <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- ── User Profile Section ───────────────────────────── -->
+  <div class="user-section" [class.collapsed]="isCollapsed">
+    <div class="user-avatar" [title]="isCollapsed ? userName : ''">
+      {{ userName.charAt(0).toUpperCase() }}
+    </div>
+    <div class="user-info" *ngIf="!isCollapsed">
+      <p class="user-role">Agent</p>
+      <p class="user-name">{{ userName }}</p>
+    </div>
+    <button
+      class="logout-btn"
+      *ngIf="!isCollapsed"
+      title="Logout"
+      (click)="onLogout()"
+    >
+      <i class="pi pi-sign-out"></i>
+    </button>
+    <button
+      class="logout-btn-icon"
+      *ngIf="isCollapsed"
+      title="Logout"
+      (click)="onLogout()"
+    >
+      <i class="pi pi-sign-out"></i>
+    </button>
+  </div>
+
+  <!-- ── Collapse Toggle ────────────────────────────────── -->
+  <div class="collapse-section">
+    <button class="collapse-btn" (click)="toggle()" [title]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <i class="pi" [ngClass]="isCollapsed ? 'pi-chevron-right' : 'pi-chevron-left'"></i>
+      <span *ngIf="!isCollapsed">Collapse</span>
+    </button>
+  </div>
+
+</nav>

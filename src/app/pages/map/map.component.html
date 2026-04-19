@@ -1,0 +1,119 @@
+<div class="map-page-layout">
+
+  <!-- ── Left: Device Tracking List ────────────────────────────── -->
+  <div class="device-sidebar">
+
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <i class="pi pi-map-marker"></i>
+        <span>Live Track</span>
+      </div>
+      <span class="device-count" *ngIf="!loading()">
+        {{ filteredDevices().length }} of {{ trackableDevices().length }} devices
+      </span>
+    </div>
+
+    <!-- Search -->
+    <div class="sidebar-search">
+      <i class="pi pi-search search-icon"></i>
+      <input
+        type="text"
+        placeholder="Search by name, username, company..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+    </div>
+
+    <!-- List -->
+    <div class="device-list">
+
+      <!-- Loading -->
+      <div *ngIf="loading()" class="list-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Loading devices...</span>
+      </div>
+
+      <!-- No trackable devices at all -->
+      <div *ngIf="!loading() && trackableDevices().length === 0" class="list-state">
+        <i class="pi pi-map"></i>
+        <span>No devices with coordinates found.</span>
+      </div>
+
+      <!-- No search results -->
+      <div *ngIf="!loading() && trackableDevices().length > 0 && filteredDevices().length === 0" class="list-state">
+        <i class="pi pi-search"></i>
+        <span>No results match your search.</span>
+      </div>
+
+      <!-- Device items -->
+      <div
+        *ngFor="let device of filteredDevices()"
+        class="device-item"
+        [class.active]="selected()?._id === device._id"
+        (click)="selectDevice(device)"
+      >
+        <div class="device-avatar">
+          <img *ngIf="device.imageUrl" [src]="device.imageUrl" [alt]="device.name" />
+          <span *ngIf="!device.imageUrl">{{ device.name.charAt(0).toUpperCase() }}</span>
+        </div>
+        <div class="device-meta">
+          <p class="device-name">{{ device.name }}</p>
+          <p class="device-sub">{{ device.company || device.username }}</p>
+        </div>
+        <i class="pi pi-angle-right arrow-icon"></i>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Right: Map ──────────────────────────────────────────────── -->
+  <div class="map-wrapper">
+    <div class="map-canvas" #mapEl></div>
+
+    <!-- No coordinates hint (shown on map surface) -->
+    <div class="no-select-hint" *ngIf="!selected() && !loading() && filteredDevices().length > 0">
+      <i class="pi pi-map-marker"></i>
+      <p>Select a device from the list to track its location</p>
+    </div>
+
+    <!-- Selected Device Info Card -->
+    <div class="info-card" *ngIf="selected()" [class.visible]="selected()">
+      <div class="info-card-header">
+        <div class="info-avatar">
+          <img *ngIf="selected()?.imageUrl" [src]="selected()?.imageUrl" [alt]="selected()?.name" />
+          <span *ngIf="!selected()?.imageUrl">{{ selected()?.name?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+        <div class="info-title">
+          <h4>{{ selected()?.name }}</h4>
+          <span>&#64;{{ selected()?.username }}</span>
+        </div>
+        <button class="close-btn" (click)="closeCard()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="info-card-body">
+        <div class="info-row" *ngIf="selected()?.email">
+          <i class="pi pi-envelope"></i>
+          <span>{{ selected()?.email }}</span>
+        </div>
+        <div class="info-row" *ngIf="selected()?.phone">
+          <i class="pi pi-phone"></i>
+          <span>{{ selected()?.phone }}</span>
+        </div>
+        <div class="info-row" *ngIf="selected()?.company">
+          <i class="pi pi-building"></i>
+          <span>{{ selected()?.company }}</span>
+        </div>
+        <div class="info-row" *ngIf="selected()?.street">
+          <i class="pi pi-home"></i>
+          <span>{{ selected()?.street }}</span>
+        </div>
+        <div class="coords-row">
+          <span class="coord-chip"><i class="pi pi-map-marker"></i> {{ selected()?.latitude | number:'1.4-4' }}</span>
+          <span class="coord-chip"><i class="pi pi-compass"></i> {{ selected()?.longitude | number:'1.4-4' }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Navbar } from './navbar/navbar/navbar';
+import { SidebarComponent } from './shared/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navbar],
+  imports: [RouterOutlet, SidebarComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {}
+export class App {
+  sidebarCollapsed = false;
+
+  onSidebarToggle() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+}

@@ -1,0 +1,286 @@
+// ── Sidebar Shell ─────────────────────────────────────────────────────────────
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 240px;
+  background: #0f1a14;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  z-index: 200;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+
+  &.collapsed {
+    width: 64px;
+
+    .brand-name,
+    .nav-label,
+    .collapse-btn span { display: none; }
+
+    .brand-icon { margin: 0 auto; }
+    .sidebar-brand { justify-content: center; padding: 0; }
+    .collapse-btn { justify-content: center; padding: 0.75rem; }
+    .nav-link { justify-content: center; padding: 0.9rem 0; }
+    .nav-icon { margin: 0; }
+  }
+}
+
+// ── Brand / Logo ──────────────────────────────────────────────────────────────
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
+  overflow: hidden;
+  min-height: 64px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #188b52, #23c46e);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(24, 139, 82, 0.4);
+
+  i {
+    font-size: 1.05rem;
+    color: #fff;
+  }
+}
+
+.brand-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+// ── Nav List ─────────────────────────────────────────────────────────────────
+.nav-list {
+  list-style: none;
+  padding: 0.75rem 0.75rem 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+}
+
+.nav-item {
+  margin-bottom: 2px;
+}
+
+// ── Nav Link ─────────────────────────────────────────────────────────────────
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.7rem 0.875rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.9);
+
+    .nav-icon { color: #23c46e; }
+  }
+
+  &.active {
+    background: rgba(24, 139, 82, 0.2);
+    color: #fff;
+
+    .nav-icon {
+      color: #23c46e;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      height: 60%;
+      width: 3px;
+      background: #23c46e;
+      border-radius: 0 3px 3px 0;
+    }
+  }
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.2s;
+  font-size: 1rem;
+}
+
+.nav-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  flex: 1;
+}
+
+// Active indicator dot (hidden — handled by ::before pseudo-element)
+.active-dot { display: none; }
+
+// ── User Profile Section ──────────────────────────────────────────────────────
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.875rem 1rem;
+  margin: 0 0.75rem 0.5rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s;
+
+  &.collapsed {
+    flex-direction: column;
+    padding: 0.75rem 0;
+    gap: 6px;
+    background: transparent;
+    border-color: transparent;
+    margin: 0 0.5rem 0.5rem;
+  }
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #188b52, #23c46e);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(24, 139, 82, 0.35);
+}
+
+.user-info {
+  flex: 1;
+  overflow: hidden;
+
+  .user-role {
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .user-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 2px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+
+  i { font-size: 0.95rem; }
+
+  &:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+  }
+}
+
+.logout-btn-icon {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  i { font-size: 0.9rem; }
+
+  &:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+  }
+}
+
+// ── Spacer ────────────────────────────────────────────────────────────────────
+.sidebar-spacer { flex: 1; }
+
+// ── Collapse Button ───────────────────────────────────────────────────────────
+.collapse-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.75rem;
+  flex-shrink: 0;
+}
+
+.collapse-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.65rem 0.875rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+
+  i { font-size: 0.85rem; flex-shrink: 0; }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}

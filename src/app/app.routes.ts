@@ -17,6 +17,11 @@ export const routes: Routes = [
       import('./pages/devices/devices').then((m) => m.Devices),
   },
   {
+    path: 'map',
+    loadComponent: () =>
+      import('./pages/map/map.component').then((m) => m.MapComponent),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },
