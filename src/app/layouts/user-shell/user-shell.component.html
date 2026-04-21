@@ -1,0 +1,28 @@
+<div class="user-layout">
+  <header class="top-navbar">
+    <div class="header-left">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="pi pi-map-marker"></i>
+        </div>
+        <span class="brand-name">VehicleTrack Pro</span>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <div class="user-profile">
+        <div class="avatar-circle">
+          {{ userName.charAt(0).toUpperCase() }}
+        </div>
+        <span class="user-name">{{ userName }}</span>
+      </div>
+      <button class="logout-btn" title="Logout" (click)="onLogout()">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-area">
+    <router-outlet></router-outlet>
+  </main>
+</div>

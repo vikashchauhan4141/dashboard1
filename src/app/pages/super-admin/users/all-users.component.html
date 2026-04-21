@@ -1,0 +1,69 @@
+<p-toast></p-toast>
+<div class="devices-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title"><i class="pi pi-users"></i> All Users</h1>
+      <span class="record-count" *ngIf="!loading">{{ users.length }} Records</span>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" placeholder="Search users..." (input)="dt.filterGlobal($event.target.value, 'contains')" />
+      </p-iconfield>
+      <button class="icon-btn" title="Refresh" (click)="loadUsers()">
+        <i class="pi pi-refresh"></i>
+      </button>
+    </div>
+
+    <!-- PrimeNG Table -->
+    <p-table #dt [value]="users" [loading]="loading" [paginator]="true" [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 25]" [globalFilterFields]="['name','email','phone','createdBy.name']"
+      [sortMode]="'multiple'" [scrollable]="true" styleClass="p-datatable-striped p-datatable-sm"
+      [tableStyle]="{ 'min-width': '62rem' }" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+      
+      <!-- Header -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width:64px">Photo</th>
+          <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email" /></th>
+          <th pSortableColumn="phone">Phone <p-sortIcon field="phone" /></th>
+          <th pSortableColumn="createdBy.name">Created By <p-sortIcon field="createdBy.name" /></th>
+        </tr>
+      </ng-template>
+
+      <!-- Body -->
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td><div class="avatar">{{ user.name ? user.name.charAt(0).toUpperCase() : 'U' }}</div></td>
+          <td><span class="fw-600">{{ user.name }}</span></td>
+          <td><a [href]="'mailto:' + user.email" class="email-link">{{ user.email }}</a></td>
+          <td><span class="text-mid">{{ user.phone || '-' }}</span></td>
+          <td>
+            <div class="created-by-badge" *ngIf="user.createdBy">
+              <span class="fw-500">{{ user.createdBy.name }}</span><br/>
+              <span class="text-muted">{{ user.createdBy.email }}</span>
+            </div>
+            <span *ngIf="!user.createdBy" class="text-muted">—</span>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty state -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <p>No users found</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

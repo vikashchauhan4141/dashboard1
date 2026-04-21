@@ -1,44 +1,33 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-export interface UserAddress {
-  street: string;
-  suite: string;
-  city: string;
-  zipcode: string;
-  geo: {
-    lat: string;
-    lng: string;
-  };
-}
-
-export interface UserCompany {
-  name: string;
-  catchPhrase: string;
-  bs: string;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  address: UserAddress;
-  phone: string;
-  website: string;
-  company: UserCompany;
-}
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { DeviceSingleResponse } from '../models/device.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class UserService {
-  private readonly apiUrl = 'https://jsonplaceholder.typicode.com/users';
+  private readonly baseUrl = `${environment.apiUrl}/user`;
 
   constructor(private http: HttpClient) {}
 
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl);
+  getMyVehicle(): Observable<DeviceSingleResponse> {
+    return this.http.get<DeviceSingleResponse>(`${this.baseUrl}/my-vehicle`).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  addMyVehicle(formData: FormData): Observable<DeviceSingleResponse> {
+    return this.http.post<DeviceSingleResponse>(`${this.baseUrl}/my-vehicle`, formData).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  updateMyLocation(lat: number, lng: number): Observable<DeviceSingleResponse> {
+    return this.http.put<DeviceSingleResponse>(`${this.baseUrl}/my-vehicle`, { lat, lng }).pipe(
+      catchError(err => throwError(() => err))
+    );
   }
 }

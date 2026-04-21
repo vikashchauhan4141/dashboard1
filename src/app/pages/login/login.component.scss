@@ -1,0 +1,201 @@
+
+
+$primary: #16A34A;
+$primary-dark: #15803d;
+$text-dark: #1e293b;
+$text-mid: #475569;
+$text-light: #94a3b8;
+$bg-panel: #0f172a;
+$sidebar-bg: #1e1b4b; // matching existing #1a1a2e roughly
+
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: #f8fafc;
+}
+
+// ── Left Side: Brand Panel ────────────────────────────────────────────────
+.brand-panel {
+  flex: 1;
+  background: linear-gradient(135deg, $bg-panel 0%, $sidebar-bg 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+
+  /* Subtle background pattern/overlay */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(22,163,74,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+}
+
+.brand-content {
+  text-align: center;
+  z-index: 10;
+  padding: 2rem;
+  max-width: 480px;
+
+  .logo-container {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    color: $primary;
+  }
+
+  .brand-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    letter-spacing: -0.5px;
+  }
+
+  .brand-subtitle {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// ── Right Side: Form Panel ────────────────────────────────────────────────
+.form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #fff;
+}
+
+.form-content {
+  width: 100%;
+  max-width: 400px;
+}
+
+.mobile-logo {
+  display: none;
+  margin-bottom: 2rem;
+  text-align: center;
+  
+  .brand-icon-mobile {
+    width: 48px;
+    height: 48px;
+    color: $primary;
+  }
+}
+
+.form-header {
+  margin-bottom: 2.5rem;
+  
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: $text-mid;
+    margin: 0;
+  }
+}
+
+.login-form {
+  .field {
+    margin-bottom: 1.5rem;
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  .password-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    .field-label { margin: 0; }
+  }
+
+  .forgot-link {
+    font-size: 0.85rem;
+    color: $primary;
+    text-decoration: none;
+    font-weight: 500;
+    
+    &:hover {
+      text-decoration: underline;
+      color: $primary-dark;
+    }
+  }
+
+  .w-full {
+    width: 100% !important;
+  }
+
+  .error-text {
+    display: block;
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.4rem;
+  }
+}
+
+.submit-action {
+  margin-top: 2rem;
+  
+  ::ng-deep .signin-btn {
+    padding: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    background: $primary;
+    border: 1px solid $primary;
+    border-radius: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+      background: $primary-dark;
+      border-color: $primary-dark;
+    }
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  .brand-panel {
+    display: none;
+  }
+  
+  .mobile-logo {
+    display: block;
+  }
+}

@@ -1,0 +1,31 @@
+<div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed">
+  
+  <app-sidebar 
+    [isCollapsed]="isSidebarCollapsed" 
+    (toggleCollapse)="toggleSidebar()">
+  </app-sidebar>
+
+  <div class="main-content">
+    <header class="top-navbar">
+      <div class="header-left">
+        <button class="menu-toggle" (click)="toggleSidebar()">
+          <i class="pi pi-bars"></i>
+        </button>
+        <h2 class="page-title">VehicleTrack</h2>
+      </div>
+      
+      <div class="header-right">
+        <div class="user-profile">
+          <div class="avatar-circle">
+            {{ userName.charAt(0).toUpperCase() }}
+          </div>
+          <span class="user-name">{{ userName }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

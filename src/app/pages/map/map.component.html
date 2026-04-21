@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class="map-page-layout">
 
   <!-- ── Left: Device Tracking List ────────────────────────────── -->
@@ -9,12 +10,12 @@
         <span>Live Track</span>
       </div>
       <span class="device-count" *ngIf="!loading()">
-        {{ filteredDevices().length }} of {{ trackableDevices().length }} devices
+        {{ filteredDevices().length }} of {{ trackableDevices().length }} {{ isUserRole ? 'vehicle' : 'devices' }}
       </span>
     </div>
 
-    <!-- Search -->
-    <div class="sidebar-search">
+    <!-- Search (Only show if not user role) -->
+    <div class="sidebar-search" *ngIf="!isUserRole">
       <i class="pi pi-search search-icon"></i>
       <input
         type="text"
@@ -30,17 +31,17 @@
       <!-- Loading -->
       <div *ngIf="loading()" class="list-state">
         <i class="pi pi-spin pi-spinner"></i>
-        <span>Loading devices...</span>
+        <span>Loading...</span>
       </div>
 
       <!-- No trackable devices at all -->
       <div *ngIf="!loading() && trackableDevices().length === 0" class="list-state">
         <i class="pi pi-map"></i>
-        <span>No devices with coordinates found.</span>
+        <span>{{ isUserRole ? 'No vehicle configured' : 'No devices with coordinates found.' }}</span>
       </div>
 
       <!-- No search results -->
-      <div *ngIf="!loading() && trackableDevices().length > 0 && filteredDevices().length === 0" class="list-state">
+      <div *ngIf="!loading() && !isUserRole && trackableDevices().length > 0 && filteredDevices().length === 0" class="list-state">
         <i class="pi pi-search"></i>
         <span>No results match your search.</span>
       </div>
@@ -54,11 +55,11 @@
       >
         <div class="device-avatar">
           <img *ngIf="device.imageUrl" [src]="device.imageUrl" [alt]="device.name" />
-          <span *ngIf="!device.imageUrl">{{ device.name.charAt(0).toUpperCase() }}</span>
+          <span *ngIf="!device.imageUrl">{{ device.name ? device.name.charAt(0).toUpperCase() : 'V' }}</span>
         </div>
         <div class="device-meta">
           <p class="device-name">{{ device.name }}</p>
-          <p class="device-sub">{{ device.company || device.username }}</p>
+          <p class="device-sub" *ngIf="device.company || device.username">{{ device.company || device.username }}</p>
         </div>
         <i class="pi pi-angle-right arrow-icon"></i>
       </div>
@@ -73,7 +74,7 @@
     <!-- No coordinates hint (shown on map surface) -->
     <div class="no-select-hint" *ngIf="!selected() && !loading() && filteredDevices().length > 0">
       <i class="pi pi-map-marker"></i>
-      <p>Select a device from the list to track its location</p>
+      <p>Select a {{ isUserRole ? 'vehicle' : 'device' }} from the list to track its location</p>
     </div>
 
     <!-- Selected Device Info Card -->
@@ -81,11 +82,11 @@
       <div class="info-card-header">
         <div class="info-avatar">
           <img *ngIf="selected()?.imageUrl" [src]="selected()?.imageUrl" [alt]="selected()?.name" />
-          <span *ngIf="!selected()?.imageUrl">{{ selected()?.name?.charAt(0)?.toUpperCase() }}</span>
+          <span *ngIf="!selected()?.imageUrl">{{ selected()!.name ? selected()!.name.charAt(0).toUpperCase() : 'V' }}</span>
         </div>
         <div class="info-title">
           <h4>{{ selected()?.name }}</h4>
-          <span>&#64;{{ selected()?.username }}</span>
+          <span *ngIf="selected()?.username">&#64;{{ selected()?.username }}</span>
         </div>
         <button class="close-btn" (click)="closeCard()">
           <i class="pi pi-times"></i>
@@ -108,7 +109,7 @@
           <i class="pi pi-home"></i>
           <span>{{ selected()?.street }}</span>
         </div>
-        <div class="coords-row">
+        <div class="coords-row" *ngIf="selected()?.latitude && selected()?.longitude">
           <span class="coord-chip"><i class="pi pi-map-marker"></i> {{ selected()?.latitude | number:'1.4-4' }}</span>
           <span class="coord-chip"><i class="pi pi-compass"></i> {{ selected()?.longitude | number:'1.4-4' }}</span>
         </div>
@@ -117,3 +118,42 @@
 
   </div>
 </div>
+
+<!-- Add Vehicle Dialog for User -->
+<p-dialog [(visible)]="displayAddVehicle" [style]="{width: '450px'}" header="Add Your Vehicle" [modal]="true" [closable]="false" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <p class="mb-4 text-gray-600">Please provide your vehicle details to start tracking on the map.</p>
+    
+    <div class="text-center mb-3">
+      <div style="width:100px; height:100px; border-radius:12px; margin:0 auto; overflow:hidden; border:2px dashed #ccc; display:flex; align-items:center; justify-content:center; background:#f8fafc;">
+        <img *ngIf="imagePreview" [src]="imagePreview" style="width:100%; height:100%; object-fit:cover;" />
+        <div *ngIf="!imagePreview" style="color:#94a3b8; text-align:center;">
+          <i class="pi pi-camera" style="font-size:1.5rem;"></i><br/><small>Photo</small>
+        </div>
+      </div>
+      <input id="vehicle-img" type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+      <button pButton title="Upload Photo" class="p-button-text p-button-sm mt-2" onclick="document.getElementById('vehicle-img').click()">Upload Photo</button>
+    </div>
+
+    <form [formGroup]="vehicleForm" style="display: flex; flex-direction: column; gap: 1rem;">
+      <div class="field">
+        <label for="v-name">Vehicle Name <span class="text-red-500">*</span></label>
+        <input type="text" pInputText id="v-name" formControlName="name" placeholder="e.g. Toyota Prius" />
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="field">
+          <label for="v-lat">Latitude <span class="text-red-500">*</span></label>
+          <input type="number" pInputText id="v-lat" formControlName="lat" step="any" placeholder="28.6139" />
+        </div>
+        <div class="field">
+          <label for="v-lng">Longitude <span class="text-red-500">*</span></label>
+          <input type="number" pInputText id="v-lng" formControlName="lng" step="any" placeholder="77.2090" />
+        </div>
+      </div>
+    </form>
+  </ng-template>
+  
+  <ng-template pTemplate="footer">
+    <button pButton label="Save Vehicle" icon="pi pi-check" class="p-button-success" (click)="saveVehicle()" [loading]="saving"></button>
+  </ng-template>
+</p-dialog>

@@ -5,7 +5,7 @@
     <div class="brand-icon">
       <i class="pi pi-th-large"></i>
     </div>
-    <span class="brand-name" *ngIf="!isCollapsed">Dashboard</span>
+    <span class="brand-name" *ngIf="!isCollapsed">VehicleTrack</span>
   </div>
 
   <!-- ── Nav Items ──────────────────────────────────────── -->
@@ -29,7 +29,7 @@
       {{ userName.charAt(0).toUpperCase() }}
     </div>
     <div class="user-info" *ngIf="!isCollapsed">
-      <p class="user-role">Agent</p>
+      <p class="user-role">{{ userRole }}</p>
       <p class="user-name">{{ userName }}</p>
     </div>
     <button

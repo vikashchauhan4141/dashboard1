@@ -10,7 +10,7 @@ $text-light:   #8aab98;
 // ── Page Layout ───────────────────────────────────────────────────────────────
 .map-page-layout {
   display: flex;
-  height: calc(100vh - 2rem);
+  height: calc(100vh - 96px); /* Adjusted for admin top navbar */
   margin: 1rem;
   border-radius: 12px;
   overflow: hidden;

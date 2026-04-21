@@ -1,0 +1,151 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+<app-page-header title="My Devices" subtitle="Manage your tracking devices">
+  <button pButton label="Add Device" icon="pi pi-plus" class="p-button-success" (click)="openCreateDialog()"></button>
+</app-page-header>
+
+<div class="card">
+  <div class="table-toolbar mb-3 flex justify-content-end">
+    <p-iconfield>
+      <p-inputicon styleClass="pi pi-search" />
+      <input pInputText type="text" placeholder="Search devices..." (input)="onGlobalFilter($event)" />
+    </p-iconfield>
+  </div>
+
+  <p-table 
+    #dt
+    [value]="devices" 
+    [loading]="loading" 
+    [paginator]="true" 
+    [rows]="10" 
+    [showCurrentPageReport]="true"
+    [globalFilterFields]="['name','username','email','phone','street','company']"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    styleClass="p-datatable-sm custom-table">
+    
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 50px">#</th>
+        <th>Photo</th>
+        <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="username">Username <p-sortIcon field="username"></p-sortIcon></th>
+        <th pSortableColumn="company">Company <p-sortIcon field="company"></p-sortIcon></th>
+        <th>Location</th>
+        <th style="width: 120px; text-align: center;">Actions</th>
+      </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="body" let-device let-i="rowIndex">
+      <tr>
+        <td>{{ i + 1 }}</td>
+        <td>
+          <div class="device-photo">
+            <img *ngIf="device.imageUrl" [src]="device.imageUrl" alt="device photo" />
+            <span *ngIf="!device.imageUrl">{{ device.name.charAt(0).toUpperCase() }}</span>
+          </div>
+        </td>
+        <td class="font-semibold">{{ device.name }}</td>
+        <td>&#64;{{ device.username }}</td>
+        <td>{{ device.company || '-' }}</td>
+        <td>
+          <div class="coords-badge" *ngIf="device.lat && device.lng">
+            <i class="pi pi-map-marker"></i>
+            <span>{{ device.lat | number:'1.4-4' }}, {{ device.lng | number:'1.4-4' }}</span>
+          </div>
+          <span *ngIf="!device.lat || !device.lng" class="text-gray-400">-</span>
+        </td>
+        <td style="text-align: center;">
+          <div class="action-buttons">
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" (click)="openEditDialog(device)" title="Edit"></button>
+            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text p-button-sm" (click)="deleteDevice(device._id)" title="Delete"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center p-4">No devices found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Create/Edit Dialog -->
+<p-dialog [(visible)]="displayDialog" [style]="{width: '550px'}" [header]="editingId ? 'Edit Device' : 'Add New Device'" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    
+    <!-- Image Area -->
+    <div class="image-upload-section mb-4">
+      <div class="image-preview-wrap">
+        <img *ngIf="imagePreview" [src]="imagePreview" alt="Preview" class="image-preview" />
+        <div *ngIf="!imagePreview" class="image-placeholder">
+          <i class="pi pi-camera"></i>
+          <span>No image</span>
+        </div>
+      </div>
+      <div class="image-actions flex flex-column gap-2 mt-2">
+        <input id="img-input" type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+        <button pButton label="Upload/Change Image" icon="pi pi-upload" class="p-button-outlined p-button-sm" onclick="document.getElementById('img-input').click()"></button>
+        <button *ngIf="imagePreview && selectedFile" pButton label="Remove Selection" icon="pi pi-times" class="p-button-outlined p-button-secondary p-button-sm" (click)="clearSelectedImage()"></button>
+        <button *ngIf="imagePreview && editingId && !selectedFile" pButton label="Remove Saved Image" icon="pi pi-trash" class="p-button-outlined p-button-danger p-button-sm" (click)="confirmRemoveExistingImage()" [loading]="removingImage"></button>
+      </div>
+    </div>
+
+    <form [formGroup]="deviceForm" class="dialog-form">
+      <div class="grid-2">
+        <div class="field">
+          <label for="name">Name <span class="text-red-500">*</span></label>
+          <input type="text" pInputText id="name" formControlName="name" />
+          <small class="p-error" *ngIf="deviceForm.get('name')?.invalid && deviceForm.get('name')?.touched">Required.</small>
+        </div>
+        <div class="field">
+          <label for="username">Username <span class="text-red-500">*</span></label>
+          <input type="text" pInputText id="username" formControlName="username" />
+          <small class="p-error" *ngIf="deviceForm.get('username')?.invalid && deviceForm.get('username')?.touched">Required.</small>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="email">Email <span class="text-red-500">*</span></label>
+          <input type="email" pInputText id="email" formControlName="email" />
+        </div>
+        <div class="field">
+          <label for="phone">Phone <span class="text-red-500">*</span></label>
+          <input type="text" pInputText id="phone" formControlName="phone" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="company">Company <span class="text-red-500">*</span></label>
+          <input type="text" pInputText id="company" formControlName="company" />
+        </div>
+        <div class="field">
+          <label for="street">Street <span class="text-red-500">*</span></label>
+          <input type="text" pInputText id="street" formControlName="street" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="lat">Latitude (Optional)</label>
+          <input type="number" pInputText id="lat" formControlName="lat" step="any" />
+        </div>
+        <div class="field">
+          <label for="lng">Longitude (Optional)</label>
+          <input type="number" pInputText id="lng" formControlName="lng" step="any" />
+        </div>
+      </div>
+    </form>
+  </ng-template>
+  
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton label="Save Device" icon="pi pi-check" class="p-button-success" (click)="saveDevice()" [loading]="saving"></button>
+  </ng-template>
+</p-dialog>

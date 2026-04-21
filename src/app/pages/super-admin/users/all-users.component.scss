@@ -1,0 +1,458 @@
+// ── Theme tokens ──────────────────────────────────────────────────────────────
+$primary:       #188b52;
+$primary-dark:  #145f3a;
+$primary-light: #1fa85f;
+$bg-page:       #f4f7f5;
+$border:        #dde8e2;
+$text-dark:     #1a2e22;
+$text-mid:      #4a6355;
+$text-light:    #8aab98;
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+.devices-container {
+  padding: 28px 32px;
+  background: $bg-page;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .page-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    i { color: $primary; }
+  }
+
+  .record-count {
+    background: rgba($primary, 0.08);
+    color: $primary;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba($primary, 0.18);
+  }
+
+  .add-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: $primary;
+    color: #fff;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 0.87rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    &:hover { background: $primary-light; }
+  }
+}
+
+// ── Table Card ────────────────────────────────────────────────────────────────
+.table-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid $border;
+  overflow: hidden;
+}
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid $border;
+  background: #fafcfb;
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid $border;
+    background: #fff;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: $text-mid;
+    transition: all 0.2s;
+    &:hover { border-color: $primary; color: $primary; }
+  }
+}
+
+// ── PrimeNG table theme overrides (minimal) ───────────────────────────────────
+:host ::ng-deep {
+  .p-datatable-thead > tr > th {
+    background: $primary !important;
+    color: #fff !important;
+    border-right: 1px solid rgba(255,255,255,0.12) !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    &:last-child { border-right: none !important; }
+    .p-sortable-column-icon { color: rgba(255,255,255,0.7) !important; }
+    &.p-highlight, &:hover { background: $primary-dark !important; }
+  }
+
+  .p-datatable-tbody > tr:hover {
+    background: #f0f7f3 !important;
+  }
+
+  .p-paginator {
+    background: #fafcfb;
+    border-top: 1px solid $border;
+  }
+
+  .p-paginator-page.p-highlight {
+    background: $primary !important;
+    border-color: $primary !important;
+    color: #fff !important;
+  }
+}
+
+// ── Table cell styles ─────────────────────────────────────────────────────────
+.device-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid $border;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: $primary;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btns { display: flex; gap: 6px; }
+.action-btn {
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid $border;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: $text-mid;
+  transition: all 0.18s;
+  i { font-size: 0.8rem; }
+}
+.edit-btn:hover   { background: #2563eb !important; border-color: #2563eb !important; color: #fff !important; }
+.delete-btn:hover { background: #dc2626 !important; border-color: #dc2626 !important; color: #fff !important; }
+
+.email-link { color: $text-dark; text-decoration: none; font-size: 0.86rem;
+              &:hover { color: $primary; text-decoration: underline; } }
+
+.coords-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba($primary, 0.07);
+  color: $primary;
+  border: 1px solid rgba($primary, 0.18);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  i { font-size: 0.75rem; }
+}
+
+.text-muted { color: $text-light; font-size: 0.86rem; }
+.fw-600 { font-weight: 600; }
+.fw-500 { font-weight: 500; }
+.mono   { font-family: 'Courier New', monospace; font-size: 0.86rem; }
+.text-mid { color: $text-mid; font-size: 0.86rem; }
+
+.empty-state {
+  text-align: center;
+  padding: 56px !important;
+  color: $text-light;
+  font-size: 0.9rem;
+  i { display: block; font-size: 2.4rem; margin-bottom: 8px; }
+}
+
+// ── Modal Overlay ─────────────────────────────────────────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.18s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-card {
+  background: #fff;
+  border-radius: 14px;
+  width: 600px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.16);
+  animation: slideUp 0.22s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  background: $primary;
+  color: #fff;
+
+  .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .modal-close-btn {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,0.15);
+    border: none; border-radius: 6px;
+    color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    &:hover { background: rgba(255,255,255,0.3); }
+  }
+}
+
+.modal-body {
+  padding: 22px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+// ── Image Upload ──────────────────────────────────────────────────────────────
+.image-upload-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px;
+  border: 1.5px dashed $border;
+  border-radius: 10px;
+  background: #fafcfb;
+  margin-bottom: 20px;
+}
+
+.image-preview-wrap {
+  flex-shrink: 0;
+  .image-preview {
+    width: 76px; height: 76px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid $border;
+  }
+  .image-placeholder {
+    width: 76px; height: 76px;
+    border-radius: 10px;
+    border: 2px dashed $border;
+    background: $bg-page;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    i { font-size: 1.3rem; color: $text-light; }
+    span { font-size: 0.7rem; color: $text-light; }
+  }
+}
+
+.image-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: $primary;
+    color: #fff;
+    border-radius: 7px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    &:hover { background: $primary-light; }
+  }
+  .btn-remove-img {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    background: #fff;
+    color: #dc2626;
+    border: 1.5px solid #fecaca;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover { background: #fef2f2; }
+  }
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  @media (max-width: 540px) { grid-template-columns: 1fr; }
+}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text-mid;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  .required   { color: #dc2626; }
+  .form-hint  { color: $text-light; font-weight: 400; text-transform: none; font-size: 0.78rem; letter-spacing: 0; }
+}
+.form-input {
+  padding: 9px 13px;
+  border: 1.5px solid $border;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  color: $text-dark;
+  background: #fff;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  &::placeholder { color: $text-light; }
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, 0.1); }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid $border;
+  background: #fafcfb;
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.btn-cancel {
+  padding: 9px 20px;
+  background: #fff;
+  border: 1.5px solid $border;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $text-mid;
+  cursor: pointer;
+  font-family: inherit;
+  &:hover { border-color: $text-mid; color: $text-dark; }
+}
+.btn-save {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 22px;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+  &:hover:not(:disabled) { background: $primary-light; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+.btn-delete {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 22px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  &:hover:not(:disabled) { background: #b91c1c; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+// ── Confirm Card ──────────────────────────────────────────────────────────────
+.confirm-card {
+  background: #fff;
+  border-radius: 14px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.16);
+  animation: slideUp 0.22s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  .confirm-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    i { font-size: 1.5rem; }
+
+    &.danger { background: #fef2f2; border: 2px solid #fecaca; i { color: #dc2626; } }
+    &.warn   { background: #fffbeb; border: 2px solid #fde68a; i { color: #d97706; } }
+  }
+
+  .confirm-title   { font-size: 1.05rem; font-weight: 700; color: $text-dark; margin: 0; }
+  .confirm-message { font-size: 0.875rem; color: $text-mid; margin: 0; line-height: 1.5;
+                     strong { color: $text-dark; } }
+  .confirm-actions { display: flex; gap: 10px; }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .devices-container { padding: 16px; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+}

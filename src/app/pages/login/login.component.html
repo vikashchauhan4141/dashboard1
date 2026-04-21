@@ -1,0 +1,91 @@
+<div class="login-wrapper">
+  <!-- Left Side: Branding Panel -->
+  <div class="brand-panel">
+    <div class="brand-content">
+      <div class="logo-container">
+        <!-- SVG Pin Icon for Vehicle Tracking -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brand-icon">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+      </div>
+      <h1 class="brand-title">VehicleTrack Pro</h1>
+      <p class="brand-subtitle">Real-time fleet monitoring & management.</p>
+    </div>
+  </div>
+
+  <!-- Right Side: Login Form Panel -->
+  <div class="form-panel">
+    <div class="form-content">
+      <div class="mobile-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brand-icon-mobile">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+      </div>
+      
+      <div class="form-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to your account to continue</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        
+        <!-- Email Field -->
+        <div class="field">
+          <label for="email" class="field-label">Email Address</label>
+          <input 
+            pInputText 
+            id="email" 
+            type="email" 
+            formControlName="email" 
+            placeholder="admin@example.com" 
+            class="w-full"
+            [class.ng-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+            [class.ng-dirty]="loginForm.get('email')?.touched"
+          />
+          <small class="error-text" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            Please enter a valid email.
+          </small>
+        </div>
+
+        <!-- Password Field -->
+        <div class="field">
+          <div class="password-label-row">
+            <label for="password" class="field-label">Password</label>
+            <a href="#" class="forgot-link" (click)="$event.preventDefault()">Forgot Password?</a>
+          </div>
+          <p-password 
+            id="password" 
+            formControlName="password" 
+            [toggleMask]="true" 
+            [feedback]="false"
+            placeholder="Enter your password"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            [class.ng-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+            [class.ng-dirty]="loginForm.get('password')?.touched"
+          ></p-password>
+          <small class="error-text" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            Password is required.
+          </small>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="submit-action">
+          <button 
+            pButton 
+            type="submit" 
+            label="Sign In" 
+            class="p-button-success w-full signin-btn" 
+            [loading]="loading"
+          ></button>
+        </div>
+
+        <!-- Error Alert -->
+        <p-message *ngIf="errorMsg" severity="error" [text]="errorMsg" styleClass="w-full mt-3"></p-message>
+        
+      </form>
+    </div>
+  </div>
+</div>

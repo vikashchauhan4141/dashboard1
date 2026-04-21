@@ -63,7 +63,7 @@
           <!-- Photo -->
           <td>
             <img *ngIf="device.imageUrl" [src]="device.imageUrl" [alt]="device.name" class="device-thumb" />
-            <div *ngIf="!device.imageUrl" class="avatar">{{ device.name.charAt(0).toUpperCase() }}</div>
+            <div *ngIf="!device.imageUrl" class="avatar">{{ device.name ? device.name.charAt(0).toUpperCase() : 'D' }}</div>
           </td>
           <!-- Name -->
           <td><span class="fw-600">{{ device.name }}</span></td>

@@ -1,0 +1,204 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="devices-container">
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title"><i class="pi pi-shield"></i> Admins</h1>
+      <span class="record-count" *ngIf="!loading">{{ admins.length }} Records</span>
+    </div>
+    <button class="add-btn" (click)="openCreateDialog()">
+      <i class="pi pi-plus"></i> Create Admin
+    </button>
+  </div>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" placeholder="Search admins..." (input)="dt.filterGlobal($event.target.value, 'contains')" />
+      </p-iconfield>
+      <button class="icon-btn" title="Refresh" (click)="loadAdmins()" [disabled]="loading || refreshing">
+        <i class="pi" [ngClass]="(loading || refreshing) ? 'pi-spin pi-spinner' : 'pi-refresh'"></i>
+      </button>
+    </div>
+
+    <p-table #dt [value]="admins" [loading]="loading" [paginator]="true" [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 25]" [globalFilterFields]="['name','email','phone']"
+      [sortMode]="'multiple'" [scrollable]="true" styleClass="p-datatable-striped p-datatable-sm"
+      [tableStyle]="{ 'min-width': '70rem' }" [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width:64px">Photo</th>
+          <th pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email" /></th>
+          <th pSortableColumn="phone">Phone <p-sortIcon field="phone" /></th>
+          <th pSortableColumn="isActive">Status <p-sortIcon field="isActive" /></th>
+          <th pSortableColumn="createdAt">Registered <p-sortIcon field="createdAt" /></th>
+          <th style="width:132px">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-admin>
+        <tr>
+          <td><div class="avatar">{{ admin.name ? admin.name.charAt(0).toUpperCase() : 'A' }}</div></td>
+          <td>
+            <div class="identity-block">
+              <span class="fw-600">{{ admin.name }}</span>
+              <span class="identity-subtext">Admin account</span>
+            </div>
+          </td>
+          <td><a [href]="'mailto:' + admin.email" class="email-link">{{ admin.email }}</a></td>
+          <td><span class="text-mid">{{ admin.phone || '-' }}</span></td>
+          <td>
+            <span class="status-pill" [ngClass]="admin.isActive !== false ? 'active' : 'inactive'">
+              {{ admin.isActive !== false ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td><span class="text-mid">{{ admin.createdAt | date:'mediumDate' }}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="action-btn edit-btn" title="Edit" (click)="openEditDialog(admin)" [disabled]="loadingAdminDetails">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="action-btn delete-btn" title="Delete" (click)="deleteAdmin(admin._id)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <p>No admins found</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="displayDialog"
+  [style]="{width: '560px'}"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="!saving"
+  [dismissableMask]="!saving"
+  styleClass="p-fluid admin-dialog"
+  (onHide)="handleDialogHidden()">
+  <ng-template pTemplate="header">
+    <div class="dialog-hero">
+      <div class="dialog-hero-icon" [class.edit-mode]="isEditMode">
+        <i class="pi" [ngClass]="isEditMode ? 'pi-pencil' : 'pi-plus'"></i>
+      </div>
+      <div class="dialog-hero-copy">
+        <h2>{{ dialogTitle }}</h2>
+        <p>{{ dialogSubtitle }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    <div class="dialog-loading-state" *ngIf="loadingAdminDetails">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Loading admin details...</p>
+    </div>
+
+    <div class="dialog-error-state" *ngIf="!loadingAdminDetails && adminEditorError">
+      <i class="pi pi-exclamation-circle"></i>
+      <h3>Could not load admin details</h3>
+      <p>{{ adminEditorError }}</p>
+      <button class="btn-retry" type="button" (click)="retryLoadAdminDetails()">Try Again</button>
+    </div>
+
+    <div *ngIf="!loadingAdminDetails && !adminEditorError">
+      <div class="editor-summary" *ngIf="isEditMode">
+        <div class="summary-avatar">{{ adminInitial }}</div>
+        <div class="summary-copy">
+          <span class="summary-label">Editing Admin</span>
+          <strong>{{ adminForm.get('name')?.value || 'Admin Profile' }}</strong>
+          <small>{{ adminForm.get('email')?.value || 'Email unavailable' }}</small>
+        </div>
+        <span class="status-pill" [ngClass]="currentStatusLabel === 'Active' ? 'active' : 'inactive'">
+          {{ currentStatusLabel }}
+        </span>
+      </div>
+
+      <div class="info-banner" *ngIf="!isEditMode">
+        <i class="pi pi-shield"></i>
+        <span>New admins are created with active access. Use a strong password of at least 8 characters.</span>
+      </div>
+
+      <form [formGroup]="adminForm" class="admin-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name <span class="required">*</span></label>
+            <input type="text" pInputText class="form-input" formControlName="name" placeholder="Enter full name" />
+            <small class="field-error" *ngIf="adminForm.get('name')?.invalid && adminForm.get('name')?.touched">Name is required.</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email <span class="required">*</span></label>
+            <input type="email" pInputText class="form-input" formControlName="email" placeholder="Enter email" />
+            <small class="field-error" *ngIf="adminForm.get('email')?.invalid && adminForm.get('email')?.touched">Enter a valid email address.</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone <span class="required">*</span></label>
+            <input type="text" pInputText class="form-input" formControlName="phone" placeholder="Enter phone" />
+            <small class="field-error" *ngIf="adminForm.get('phone')?.invalid && adminForm.get('phone')?.touched">Phone number is required.</small>
+          </div>
+
+          <div class="form-group password-group" *ngIf="!isEditMode">
+            <label class="form-label">Password <span class="required">*</span></label>
+            <p-password formControlName="password" [toggleMask]="true" styleClass="w-full" placeholder="Enter secure password"></p-password>
+            <small class="field-error" *ngIf="adminForm.get('password')?.invalid && adminForm.get('password')?.touched">Password must be at least 8 characters.</small>
+          </div>
+        </div>
+
+        <div class="status-card" *ngIf="isEditMode">
+          <div class="status-card-copy">
+            <span class="status-card-label">Account Status</span>
+            <p>Inactive admins cannot continue protected admin work until you reactivate their account.</p>
+          </div>
+
+          <label class="status-toggle">
+            <input type="checkbox" formControlName="isActive" />
+            <span class="status-toggle-track">
+              <span class="status-toggle-thumb"></span>
+            </span>
+            <span class="status-toggle-text">{{ currentStatusLabel }}</span>
+          </label>
+        </div>
+
+        <div class="meta-grid" *ngIf="isEditMode && selectedAdmin">
+          <div class="meta-card">
+            <span class="meta-label">Created</span>
+            <strong>{{ selectedAdmin.createdAt | date:'medium' }}</strong>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Last Updated</span>
+            <strong>{{ selectedAdmin.updatedAt | date:'medium' }}</strong>
+          </div>
+        </div>
+      </form>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button class="btn-cancel" type="button" (click)="hideDialog()">Cancel</button>
+      <button class="btn-save" type="button" (click)="saveAdmin()" [disabled]="adminForm.invalid || saving || loadingAdminDetails || !!adminEditorError">
+        <i class="pi" [ngClass]="saving ? 'pi-spin pi-spinner' : 'pi-check'"></i>
+        {{ dialogActionLabel }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

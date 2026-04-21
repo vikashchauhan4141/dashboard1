@@ -1,0 +1,113 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+<app-page-header title="My Users" subtitle="Manage users created under your account">
+  <button pButton label="Add User" icon="pi pi-plus" class="p-button-success" (click)="openCreateDialog()"></button>
+</app-page-header>
+
+<div class="card">
+  <p-table 
+    [value]="users" 
+    [loading]="loading" 
+    [paginator]="true" 
+    [rows]="10" 
+    [showCurrentPageReport]="true"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    styleClass="p-datatable-sm custom-table">
+    
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 50px">#</th>
+        <th>Avatar</th>
+        <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+        <th pSortableColumn="phone">Phone <p-sortIcon field="phone"></p-sortIcon></th>
+        <th pSortableColumn="street">Street <p-sortIcon field="street"></p-sortIcon></th>
+        <th pSortableColumn="isActive">Status <p-sortIcon field="isActive"></p-sortIcon></th>
+        <th style="width: 120px; text-align: center;">Actions</th>
+      </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="body" let-user let-i="rowIndex">
+      <tr>
+        <td>{{ i + 1 }}</td>
+        <td>
+          <div class="avatar-circle">
+            {{ user.name.charAt(0).toUpperCase() }}
+          </div>
+        </td>
+        <td class="font-semibold">{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.phone || '-' }}</td>
+        <td>{{ user.street || '-' }}</td>
+        <td>
+          <span class="status-badge" [ngClass]="user.isActive !== false ? 'active' : 'inactive'">
+            {{ user.isActive !== false ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td style="text-align: center;">
+          <div class="action-buttons">
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" (click)="openEditDialog(user)" title="Edit"></button>
+            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text p-button-sm" (click)="deleteUser(user._id)" title="Delete"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="8" class="text-center p-4">No users found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Create/Edit Dialog -->
+<p-dialog [(visible)]="displayDialog" [style]="{width: '500px'}" [header]="editingId ? 'Edit User' : 'Add New User'" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <form [formGroup]="userForm" class="dialog-form">
+      <div class="field">
+        <label for="name">Full Name <span class="text-red-500">*</span></label>
+        <input type="text" pInputText id="name" formControlName="name" autofocus />
+        <small class="p-error" *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched">Name is required.</small>
+      </div>
+      
+      <div class="field">
+        <label for="email">Email Address <span class="text-red-500">*</span></label>
+        <input type="email" pInputText id="email" formControlName="email" [readonly]="!!editingId" [class.readonly]="!!editingId"/>
+        <small class="p-error" *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">Valid email is required.</small>
+      </div>
+
+      <div class="field" *ngIf="!editingId">
+        <label for="password">Password <span class="text-red-500">*</span></label>
+        <p-password id="password" formControlName="password" [toggleMask]="true"></p-password>
+        <small class="p-error" *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched">Password min 8 characters required.</small>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="phone">Phone Number <span class="text-red-500">*</span></label>
+          <input type="text" pInputText id="phone" formControlName="phone" />
+          <small class="p-error" *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched">Phone is required.</small>
+        </div>
+        <div class="field">
+          <label for="company">Company</label>
+          <input type="text" pInputText id="company" formControlName="company" />
+        </div>
+      </div>
+      
+      <div class="field">
+        <label for="street">Street Address</label>
+        <input type="text" pInputText id="street" formControlName="street" />
+      </div>
+
+    </form>
+  </ng-template>
+  
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton label="Save User" icon="pi pi-check" class="p-button-success" (click)="saveUser()" [loading]="saving"></button>
+  </ng-template>
+</p-dialog>

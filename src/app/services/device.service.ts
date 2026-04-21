@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 // ── Interfaces matching the API response ─────────────────────────────────────
 
@@ -61,9 +62,7 @@ export interface DeviceFormPayload {
 
 @Injectable({ providedIn: 'root' })
 export class DeviceService {
-  // ⚠️  Point to your running backend — never hard-code here, change once as needed
-  private readonly baseUrl = 'http://localhost:5000/api/devices';
-
+  private readonly baseUrl = `${environment.apiUrl}/devices`;
   constructor(private http: HttpClient) {}
 
   // ── GET  /api/devices  (with optional search + pagination) ─────────────────
