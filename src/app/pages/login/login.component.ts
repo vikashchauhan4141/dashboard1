@@ -79,9 +79,9 @@ export class LoginComponent implements OnInit {
 
   private redirectUser(role: string): void {
     if (role === 'super_admin') {
-      this.router.navigate(['/super-admin/dashboard']);
+      this.router.navigate(['/super-admin/map']);
     } else if (role === 'admin') {
-      this.router.navigate(['/admin/dashboard']);
+      this.router.navigate(['/admin/map']);
     } else {
       this.router.navigate(['/map']);
     }

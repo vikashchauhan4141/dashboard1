@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, signal, computed } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DeviceService, Device } from '../../services/device.service';
@@ -68,6 +68,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       lat: [null, Validators.required],
       lng: [null, Validators.required]
     });
+
+    // Automatically re-draw map markers when devices, filter, selection, or tempCoords change reactively
+    effect(() => {
+      this.renderMarkers();
+    });
   }
 
   ngOnInit(): void {
@@ -115,7 +120,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         if (selected) {
           const updated = res.data.find(d => d._id === selected._id);
           if (updated && (updated.latitude !== selected.latitude || updated.longitude !== selected.longitude)) {
-            this.selectDevice(updated);
+            this.selectDevice(updated, false);
           }
         }
       },
@@ -141,7 +146,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!selected && res.data.latitude && res.data.longitude && this.map) {
           this.selectDevice(res.data);
         } else if (selected && (res.data.latitude !== selected.latitude || res.data.longitude !== selected.longitude)) {
-          this.selectDevice(res.data);
+          this.selectDevice(res.data, false);
         }
       },
       error: (err) => {
@@ -169,35 +174,84 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.map.on('dblclick', (e: L.LeafletMouseEvent) => {
         const { lat, lng } = e.latlng;
         this.tempCoords.set({ lat, lng });
-        this.updateTempMarker(lat, lng);
       });
       this.map.doubleClickZoom.disable();
     }
     
+    // Initial draw
+    this.renderMarkers();
+
     // Attempt auto-flight if device already loaded and selected from logic
     const selected = this.selected();
     if (selected && selected.latitude && selected.longitude) {
-        this.selectDevice(selected);
+      this.selectDevice(selected);
     }
   }
 
-  updateTempMarker(lat: number, lng: number): void {
+  renderMarkers(): void {
+    if (!this.map) return;
     this.markersLayer.clearLayers();
-    const icon = L.divIcon({
-      className: 'custom-marker',
-      html: '<div class="marker-pin"></div><div class="marker-pulse" style="background:#dc2626; border:2px solid #fff;"></div>',
-      iconSize: [30, 42],
-      iconAnchor: [15, 42],
+
+    const selectedDevice = this.selected();
+    const list = this.filteredDevices();
+
+    list.forEach(device => {
+      const lat = device.latitude;
+      const lng = device.longitude;
+      if (lat == null || lng == null) return;
+
+      const isSelected = !!selectedDevice && selectedDevice._id === device._id;
+
+      const icon = L.divIcon({
+        className: `custom-marker ${isSelected ? 'selected' : ''}`,
+        html: `<div class="marker-pin ${isSelected ? 'active-pin' : ''}"></div><div class="marker-pulse ${isSelected ? '' : 'hidden-pulse'}"></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+      });
+
+      const isDraggable = this.isUserRole && isSelected;
+
+      const marker = L.marker([lat, lng], { 
+        icon, 
+        draggable: isDraggable 
+      }).addTo(this.markersLayer);
+
+      marker.bindTooltip(device.name, {
+        permanent: false,
+        direction: 'top',
+        offset: [0, -40]
+      });
+
+      marker.on('click', () => {
+        this.selectDevice(device, false);
+      });
+
+      if (isDraggable) {
+        marker.on('dragend', (event) => {
+          const position = event.target.getLatLng();
+          this.tempCoords.set({ lat: position.lat, lng: position.lng });
+        });
+      }
     });
 
-    const marker = L.marker([lat, lng], { icon, draggable: true }).addTo(this.markersLayer);
-    marker.on('dragend', (event) => {
-      const position = event.target.getLatLng();
-      this.tempCoords.set({ lat: position.lat, lng: position.lng });
-    });
+    // Temp marker for location update
+    const temp = this.tempCoords();
+    if (this.isUserRole && temp) {
+      const icon = L.divIcon({
+        className: 'custom-marker temp',
+        html: '<div class="marker-pin temp-pin"></div><div class="marker-pulse temp-pulse"></div>',
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+      });
+      const marker = L.marker([temp.lat, temp.lng], { icon, draggable: true }).addTo(this.markersLayer);
+      marker.on('dragend', (event) => {
+        const position = event.target.getLatLng();
+        this.tempCoords.set({ lat: position.lat, lng: position.lng });
+      });
+    }
   }
 
-  selectDevice(device: Device): void {
+  selectDevice(device: Device, shouldFly = true): void {
     this.selected.set(device);
     this.tempCoords.set(null);
 
@@ -206,25 +260,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!lat || !lng) return;
 
-    this.markersLayer.clearLayers();
-
-    const icon = L.divIcon({
-      className: 'custom-marker',
-      html: '<div class="marker-pin"></div><div class="marker-pulse"></div>',
-      iconSize: [30, 42],
-      iconAnchor: [15, 42],
-    });
-
-    const marker = L.marker([lat, lng], { icon, draggable: this.isUserRole }).addTo(this.markersLayer);
-    
-    if (this.isUserRole) {
-      marker.on('dragend', (event) => {
-        const position = event.target.getLatLng();
-        this.tempCoords.set({ lat: position.lat, lng: position.lng });
-      });
-    }
-    
-    if (this.map) {
+    if (shouldFly && this.map) {
       this.map.flyTo([lat, lng], 12, { animate: true, duration: 1.4 });
     }
   }
