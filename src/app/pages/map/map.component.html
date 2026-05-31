@@ -113,6 +113,20 @@
           <span class="coord-chip"><i class="pi pi-map-marker"></i> {{ selected()?.latitude | number:'1.4-4' }}</span>
           <span class="coord-chip"><i class="pi pi-compass"></i> {{ selected()?.longitude | number:'1.4-4' }}</span>
         </div>
+    <!-- Floating Action bar for users updating location -->
+    <div class="location-update-bar" *ngIf="tempCoords()">
+      <div class="update-bar-content">
+        <i class="pi pi-info-circle text-orange-500"></i>
+        <span>New coordinates: <strong>{{ tempCoords()!.lat | number:'1.5-5' }}, {{ tempCoords()!.lng | number:'1.5-5' }}</strong></span>
+      </div>
+      <div class="update-bar-actions">
+        <button class="btn-cancel-update" (click)="resetLocationUpdates()">
+          <i class="pi pi-times"></i> Cancel
+        </button>
+        <button class="btn-save-update" (click)="saveLocationUpdates()" [disabled]="saving">
+          <i class="pi" [ngClass]="saving ? 'pi-spin pi-spinner' : 'pi-check'"></i>
+          Save Position
+        </button>
       </div>
     </div>
 

@@ -10,7 +10,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import * as L from 'leaflet';
-import { Subject } from 'rxjs';
+import { Subject, timer } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -31,6 +31,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   loading     = signal<boolean>(true);
   searchQuery = signal<string>('');
   selected    = signal<Device | null>(null);
+  tempCoords  = signal<{ lat: number; lng: number } | null>(null);
 
   isUserRole = false;
   displayAddVehicle = false;
@@ -71,12 +72,21 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
-    if (user?.role === 'user') {
-      this.isUserRole = true;
-      this.loadMyVehicle();
-    } else {
-      this.loadDevices();
-    }
+    this.isUserRole = user?.role === 'user';
+
+    // Start 15-second background polling
+    timer(0, 15000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Only poll if no pending user edits or dialogs are open
+        if (!this.tempCoords() && !this.displayAddVehicle && !this.saving) {
+          if (this.isUserRole) {
+            this.pollMyVehicle();
+          } else {
+            this.pollDevices();
+          }
+        }
+      });
   }
 
   ngAfterViewInit(): void {
@@ -91,11 +101,23 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadDevices(): void {
     this.loading.set(true);
+    this.pollDevices();
+  }
+
+  pollDevices(): void {
     this.deviceService.getDevices('', 1, 100).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         this.devices.set(res.data);
         this.loading.set(false);
-        // Map will not fly instantly, wait for user click
+
+        // Update active selection marker if coordinates changed in backend
+        const selected = this.selected();
+        if (selected) {
+          const updated = res.data.find(d => d._id === selected._id);
+          if (updated && (updated.latitude !== selected.latitude || updated.longitude !== selected.longitude)) {
+            this.selectDevice(updated);
+          }
+        }
       },
       error: (err) => {
         this.loading.set(false);
@@ -106,11 +128,19 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadMyVehicle(): void {
     this.loading.set(true);
+    this.pollMyVehicle();
+  }
+
+  pollMyVehicle(): void {
     this.userService.getMyVehicle().pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         this.loading.set(false);
         this.devices.set([res.data]);
-        if (res.data.lat && res.data.lng && this.map) {
+
+        const selected = this.selected();
+        if (!selected && res.data.latitude && res.data.longitude && this.map) {
+          this.selectDevice(res.data);
+        } else if (selected && (res.data.latitude !== selected.latitude || res.data.longitude !== selected.longitude)) {
           this.selectDevice(res.data);
         }
       },
@@ -134,6 +164,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }).addTo(this.map);
 
     this.markersLayer.addTo(this.map);
+
+    if (this.isUserRole) {
+      this.map.on('dblclick', (e: L.LeafletMouseEvent) => {
+        const { lat, lng } = e.latlng;
+        this.tempCoords.set({ lat, lng });
+        this.updateTempMarker(lat, lng);
+      });
+      this.map.doubleClickZoom.disable();
+    }
     
     // Attempt auto-flight if device already loaded and selected from logic
     const selected = this.selected();
@@ -142,8 +181,25 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  updateTempMarker(lat: number, lng: number): void {
+    this.markersLayer.clearLayers();
+    const icon = L.divIcon({
+      className: 'custom-marker',
+      html: '<div class="marker-pin"></div><div class="marker-pulse" style="background:#dc2626; border:2px solid #fff;"></div>',
+      iconSize: [30, 42],
+      iconAnchor: [15, 42],
+    });
+
+    const marker = L.marker([lat, lng], { icon, draggable: true }).addTo(this.markersLayer);
+    marker.on('dragend', (event) => {
+      const position = event.target.getLatLng();
+      this.tempCoords.set({ lat: position.lat, lng: position.lng });
+    });
+  }
+
   selectDevice(device: Device): void {
     this.selected.set(device);
+    this.tempCoords.set(null);
 
     const lat = device.latitude;
     const lng = device.longitude;
@@ -159,10 +215,47 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       iconAnchor: [15, 42],
     });
 
-    L.marker([lat, lng], { icon }).addTo(this.markersLayer);
+    const marker = L.marker([lat, lng], { icon, draggable: this.isUserRole }).addTo(this.markersLayer);
+    
+    if (this.isUserRole) {
+      marker.on('dragend', (event) => {
+        const position = event.target.getLatLng();
+        this.tempCoords.set({ lat: position.lat, lng: position.lng });
+      });
+    }
     
     if (this.map) {
       this.map.flyTo([lat, lng], 12, { animate: true, duration: 1.4 });
+    }
+  }
+
+  saveLocationUpdates(): void {
+    const coords = this.tempCoords();
+    if (!coords) return;
+
+    this.saving = true;
+    this.userService.updateMyLocation(coords.lat, coords.lng)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.saving = false;
+          this.tempCoords.set(null);
+          this.devices.set([res.data]);
+          this.selectDevice(res.data);
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Location updated successfully' });
+        },
+        error: (err) => {
+          this.saving = false;
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Failed to update location' });
+        }
+      });
+  }
+
+  resetLocationUpdates(): void {
+    this.tempCoords.set(null);
+    const selected = this.selected();
+    if (selected) {
+      this.selectDevice(selected);
     }
   }
 

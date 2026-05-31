@@ -52,6 +52,7 @@
           <th pSortableColumn="phone">Phone <p-sortIcon field="phone" /></th>
           <th pSortableColumn="street">Street <p-sortIcon field="street" /></th>
           <th pSortableColumn="company">Company <p-sortIcon field="company" /></th>
+          <th>Owner</th>
           <th>Location</th>
           <th style="width:100px">Actions</th>
         </tr>
@@ -77,6 +78,13 @@
           <td><span class="text-mid">{{ device.street }}</span></td>
           <!-- Company -->
           <td><span class="fw-500">{{ device.company }}</span></td>
+          <!-- Owner -->
+          <td>
+            <span *ngIf="device.ownerId; else noOwner" class="text-mid">
+              {{ device.ownerId.email || device.ownerId }}
+            </span>
+            <ng-template #noOwner><span class="text-muted">—</span></ng-template>
+          </td>
           <!-- Location -->
           <td>
             <div *ngIf="device.latitude != null && device.longitude != null; else noCoords" class="coords-badge">
@@ -193,6 +201,18 @@
         <div class="form-group">
           <label class="form-label">Longitude <span class="form-hint">(optional)</span></label>
           <input type="number" class="form-input" placeholder="e.g. 77.2090" step="any" [(ngModel)]="formData.longitude" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Owner <span class="form-hint">(optional)</span></label>
+          <p-select 
+            [options]="usersList()" 
+            [(ngModel)]="formData.ownerId" 
+            optionLabel="email" 
+            optionValue="_id" 
+            [showClear]="true" 
+            placeholder="Select owner"
+            styleClass="w-full">
+          </p-select>
         </div>
       </div>
 

@@ -24,6 +24,7 @@ import { Devices as DevicesComponent } from './pages/devices/devices';
 
 // User / Map
 import { MapComponent } from './pages/map/map.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -42,7 +43,8 @@ export const routes: Routes = [
       { path: 'map', component: MapComponent },
       { path: 'admins', component: AdminManagementComponent },
       { path: 'users', component: AllUsersComponent },
-      { path: 'devices', component: DevicesComponent }
+      { path: 'devices', component: DevicesComponent },
+      { path: 'profile', component: ProfileComponent }
     ]
   },
 
@@ -57,7 +59,8 @@ export const routes: Routes = [
       { path: 'dashboard', component: AdminDashboardComponent },
       { path: 'map', component: MapComponent },
       { path: 'devices', component: DevicesComponent },
-      { path: 'users', component: AdminUsersComponent }
+      { path: 'users', component: AdminUsersComponent },
+      { path: 'profile', component: ProfileComponent }
     ]
   },
 
@@ -67,7 +70,8 @@ export const routes: Routes = [
     component: UserShellComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: '', component: MapComponent }
+      { path: '', component: MapComponent },
+      { path: 'profile', component: ProfileComponent }
     ]
   },
 

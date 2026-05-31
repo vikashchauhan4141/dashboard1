@@ -381,3 +381,80 @@ $text-light:   #8aab98;
   0%   { transform: scale(0.5); opacity: 0.8; }
   100% { transform: scale(3);   opacity: 0; }
 }
+
+// ── Location Update Floating Action Bar ─────────────────────────────────────────
+.location-update-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(24, 139, 82, 0.3);
+  padding: 0.75rem 1.25rem;
+  border-radius: 30px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .update-bar-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: $text-dark;
+  }
+
+  .update-bar-actions {
+    display: flex;
+    gap: 10px;
+
+    button {
+      border: none;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .btn-cancel-update {
+      background: #f1f5f9;
+      color: #64748b;
+      &:hover {
+        background: #e2e8f0;
+      }
+    }
+
+    .btn-save-update {
+      background: $primary;
+      color: #fff;
+      &:hover:not(:disabled) {
+        background: $primary-dark;
+      }
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 15px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

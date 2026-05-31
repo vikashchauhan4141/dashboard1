@@ -7,7 +7,11 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { SelectModule } from 'primeng/select';
 import { DeviceService, Device, DeviceFormPayload } from '../../services/device.service';
+import { AdminService } from '../../services/admin.service';
+import { SuperAdminService } from '../../services/super-admin.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-devices',
@@ -21,6 +25,7 @@ import { DeviceService, Device, DeviceFormPayload } from '../../services/device.
     InputTextModule,
     IconFieldModule,
     InputIconModule,
+    SelectModule,
   ],
   templateUrl: './devices.html',
   styleUrl: './devices.scss',
@@ -31,6 +36,7 @@ export class Devices implements OnInit {
   devices = signal<Device[]>([]);
   loading = signal<boolean>(true);
   totalRecords = signal<number>(0);
+  usersList = signal<any[]>([]);
 
   // Modal state
   showModal = signal<boolean>(false);
@@ -52,10 +58,34 @@ export class Devices implements OnInit {
   selectedFile: File | null = null;
   imagePreview: string | null = null;
 
-  constructor(private deviceService: DeviceService) {}
+  constructor(
+    private deviceService: DeviceService,
+    private adminService: AdminService,
+    private superAdminService: SuperAdminService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loadDevices();
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    const obs = user.role === 'super_admin'
+      ? this.superAdminService.getUsers()
+      : this.adminService.getUsers();
+
+    obs.subscribe({
+      next: (res) => {
+        this.usersList.set(res.data || []);
+      },
+      error: (err) => {
+        console.error('Error loading users for device association:', err);
+      }
+    });
   }
 
   loadDevices(): void {
@@ -98,6 +128,7 @@ export class Devices implements OnInit {
       company: device.company,
       latitude: device.latitude ?? null,
       longitude: device.longitude ?? null,
+      ownerId: device.ownerId ?? null,
       imageFile: null,
     };
     this.selectedFile = null;
@@ -215,7 +246,7 @@ export class Devices implements OnInit {
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
   private emptyForm(): DeviceFormPayload {
-    return { name: '', username: '', email: '', phone: '', street: '', company: '', latitude: null, longitude: null, imageFile: null };
+    return { name: '', username: '', email: '', phone: '', street: '', company: '', latitude: null, longitude: null, ownerId: null, imageFile: null };
   }
 
   isFormValid(): boolean {

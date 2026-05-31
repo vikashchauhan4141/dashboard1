@@ -38,7 +38,8 @@ export class SidebarComponent implements OnInit {
           { label: 'Map', icon: 'pi-map-marker', route: '/super-admin/map' },
           { label: 'Admins', icon: 'pi-shield', route: '/super-admin/admins' },
           { label: 'Users', icon: 'pi-users', route: '/super-admin/users' },
-          { label: 'Devices', icon: 'pi-server', route: '/super-admin/devices' }
+          { label: 'Devices', icon: 'pi-server', route: '/super-admin/devices' },
+          { label: 'Profile', icon: 'pi-user-edit', route: '/super-admin/profile' }
         ];
       } else if (user.role === 'admin') {
         this.userRole = 'Admin';
@@ -46,12 +47,14 @@ export class SidebarComponent implements OnInit {
           { label: 'Dashboard', icon: 'pi-home', route: '/admin/dashboard' },
           { label: 'Map', icon: 'pi-map-marker', route: '/admin/map' },
           { label: 'Users', icon: 'pi-users', route: '/admin/users' },
-          { label: 'Devices', icon: 'pi-server', route: '/admin/devices' }
+          { label: 'Devices', icon: 'pi-server', route: '/admin/devices' },
+          { label: 'Profile', icon: 'pi-user-edit', route: '/admin/profile' }
         ];
       } else {
         // Fallback for some reason
         this.navItems = [
-          { label: 'Map', icon: 'pi-map-marker', route: '/map' }
+          { label: 'Map', icon: 'pi-map-marker', route: '/map' },
+          { label: 'Profile', icon: 'pi-user-edit', route: '/map/profile' }
         ];
       }
     }

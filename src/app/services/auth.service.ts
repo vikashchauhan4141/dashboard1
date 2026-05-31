@@ -73,6 +73,18 @@ export class AuthService {
     );
   }
 
+  updateProfile(payload: any): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.baseUrl}/profile`, payload).pipe(
+      tap(res => {
+        if (res.success && res.data) {
+          localStorage.setItem('user', JSON.stringify(res.data));
+          this.currentUserSubject.next(res.data);
+        }
+      }),
+      catchError(err => throwError(() => err))
+    );
+  }
+
   setSession(authResult: AuthResponse): void {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('refreshToken', authResult.refreshToken);

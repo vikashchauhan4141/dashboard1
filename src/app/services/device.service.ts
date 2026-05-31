@@ -18,6 +18,9 @@ export interface Device {
   longitude?: number;
   image?: string;
   imageUrl?: string;
+  ownerId?: string | null;
+  createdBy?: any;
+  isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -58,6 +61,7 @@ export interface DeviceFormPayload {
   latitude?: number | null;
   longitude?: number | null;
   imageFile?: File | null;
+  ownerId?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -77,7 +81,7 @@ export class DeviceService {
   // ── GET  /api/devices/:id ───────────────────────────────────────────────────
   getDevice(id: string): Observable<Device> {
     return this.http
-      .get<DeviceSingleResponse>(`${this.baseUrl}/${id}`)
+      .get<DeviceSingleResponse>(`${`${this.baseUrl}/${id}`}`)
       .pipe(map((r) => r.data));
   }
 
@@ -93,18 +97,18 @@ export class DeviceService {
   updateDevice(id: string, payload: DeviceFormPayload): Observable<Device> {
     const fd = this.buildFormData(payload);
     return this.http
-      .put<DeviceMutationResponse>(`${this.baseUrl}/${id}`, fd)
+      .put<DeviceMutationResponse>(`${`${this.baseUrl}/${id}`}`, fd)
       .pipe(map((r) => r.data));
   }
 
   // ── DELETE /api/devices/:id ─────────────────────────────────────────────────
   deleteDevice(id: string): Observable<DeviceDeleteResponse> {
-    return this.http.delete<DeviceDeleteResponse>(`${this.baseUrl}/${id}`);
+    return this.http.delete<DeviceDeleteResponse>(`${`${this.baseUrl}/${id}`}`);
   }
 
   // ── DELETE /api/devices/:id/image  (remove image, keep device) ─────────────
   removeDeviceImage(id: string): Observable<DeviceDeleteResponse> {
-    return this.http.delete<DeviceDeleteResponse>(`${this.baseUrl}/${id}/image`);
+    return this.http.delete<DeviceDeleteResponse>(`${`${this.baseUrl}/${id}/image`}`);
   }
 
   // ── Helper: build FormData from payload ────────────────────────────────────
@@ -118,6 +122,7 @@ export class DeviceService {
     fd.append('company', payload.company);
     if (payload.latitude != null) fd.append('latitude', String(payload.latitude));
     if (payload.longitude != null) fd.append('longitude', String(payload.longitude));
+    if (payload.ownerId) fd.append('ownerId', payload.ownerId);
     if (payload.imageFile) {
       fd.append('image', payload.imageFile, payload.imageFile.name);
     }

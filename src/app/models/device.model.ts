@@ -9,6 +9,9 @@ export interface Device {
   imageUrl?: string;
   lat?: number;
   lng?: number;
+  latitude?: number;
+  longitude?: number;
+  isActive?: boolean;
   createdBy?: { name: string; email: string };
   ownerId?: string;
   createdAt: string;
