@@ -44,6 +44,18 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  fillCredentials(email: string, pass: string): void {
+    this.loginForm.patchValue({
+      email: email,
+      password: pass
+    });
+    // Mark controls as dirty and touched to trigger visual state updates in PrimeNG inputs
+    this.loginForm.get('email')?.markAsDirty();
+    this.loginForm.get('email')?.markAsTouched();
+    this.loginForm.get('password')?.markAsDirty();
+    this.loginForm.get('password')?.markAsTouched();
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();

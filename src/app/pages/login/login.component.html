@@ -86,6 +86,47 @@
         <p-message *ngIf="errorMsg" severity="error" [text]="errorMsg" styleClass="w-full mt-3"></p-message>
         
       </form>
+
+      <!-- Demo Credentials Card -->
+      <div class="demo-card">
+        <h3 class="demo-title">Demo Accounts</h3>
+        <p class="demo-subtitle">Click to auto-fill the login fields:</p>
+        
+        <div class="demo-list">
+          <div class="demo-item" (click)="fillCredentials('superadmin@system.com', 'SuperAdmin@123')">
+            <div class="demo-item-header">
+              <span class="role-badge super-admin">Super Admin</span>
+              <span class="auto-fill-text">Click to fill ⚡</span>
+            </div>
+            <div class="demo-credentials">
+              <span><strong>Email:</strong> superadmin@system.com</span>
+              <span><strong>Pass:</strong> SuperAdmin@123</span>
+            </div>
+          </div>
+
+          <div class="demo-item" (click)="fillCredentials('admin@system.com', 'Admin@123')">
+            <div class="demo-item-header">
+              <span class="role-badge admin">Admin</span>
+              <span class="auto-fill-text">Click to fill ⚡</span>
+            </div>
+            <div class="demo-credentials">
+              <span><strong>Email:</strong> admin@system.com</span>
+              <span><strong>Pass:</strong> Admin@123</span>
+            </div>
+          </div>
+
+          <div class="demo-item" (click)="fillCredentials('user@system.com', 'User@123')">
+            <div class="demo-item-header">
+              <span class="role-badge user">User</span>
+              <span class="auto-fill-text">Click to fill ⚡</span>
+            </div>
+            <div class="demo-credentials">
+              <span><strong>Email:</strong> user@system.com</span>
+              <span><strong>Pass:</strong> User@123</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
