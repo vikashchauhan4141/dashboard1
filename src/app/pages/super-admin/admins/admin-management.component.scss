@@ -473,6 +473,70 @@ $text-light:    #8aab98;
   }
 }
 
+.security-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(#2563eb, 0.14);
+  background: linear-gradient(135deg, rgba(#eff6ff, 0.96), rgba(#ffffff, 1));
+}
+
+.security-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.security-card-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  p {
+    margin: 0;
+    color: $text-mid;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    max-width: 420px;
+  }
+}
+
+.security-card-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #2563eb;
+  text-transform: uppercase;
+}
+
+.security-card-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 94px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(#2563eb, 0.1);
+  border: 1px solid rgba(#2563eb, 0.16);
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.pending {
+    background: rgba($primary, 0.12);
+    border-color: rgba($primary, 0.18);
+    color: $primary-dark;
+  }
+}
+
+.security-grid {
+  gap: 14px;
+}
+
 .status-card {
   display: flex;
   align-items: center;
@@ -714,6 +778,7 @@ $text-light:    #8aab98;
     grid-template-columns: 1fr;
   }
 
+  .security-card-head,
   .editor-summary,
   .status-card {
     flex-direction: column;

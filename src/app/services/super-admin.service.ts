@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { User, UserResponse, UserListResponse, SuperAdminStatsResponse } from '../models/user.model';
+import { AdminUpdatePayload, User, UserResponse, UserListResponse, SuperAdminStatsResponse } from '../models/user.model';
 import { DeviceListResponse } from '../models/device.model';
 
 @Injectable({
@@ -43,7 +43,7 @@ export class SuperAdminService {
     );
   }
 
-  updateAdmin(id: string, data: Partial<User>): Observable<UserResponse> {
+  updateAdmin(id: string, data: AdminUpdatePayload): Observable<UserResponse> {
     return this.http.put<UserResponse>(`${this.baseUrl}/admins/${id}`, data).pipe(
       catchError(err => throwError(() => err))
     );

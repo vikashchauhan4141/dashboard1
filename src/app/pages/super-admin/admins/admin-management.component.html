@@ -158,8 +158,36 @@
 
           <div class="form-group password-group" *ngIf="!isEditMode">
             <label class="form-label">Password <span class="required">*</span></label>
-            <p-password formControlName="password" [toggleMask]="true" styleClass="w-full" placeholder="Enter secure password"></p-password>
+            <p-password formControlName="password" [toggleMask]="true" [feedback]="false" styleClass="w-full" placeholder="Enter secure password"></p-password>
             <small class="field-error" *ngIf="adminForm.get('password')?.invalid && adminForm.get('password')?.touched">Password must be at least 8 characters.</small>
+          </div>
+        </div>
+
+        <div class="security-card" *ngIf="isEditMode">
+          <div class="security-card-head">
+            <div class="security-card-copy">
+              <span class="security-card-label">Password Reset</span>
+              <p>Leave these fields blank to keep the current password. Add a new password only when you want to reset admin access.</p>
+            </div>
+            <span class="security-card-badge" [class.pending]="passwordResetRequested">
+              {{ passwordResetStatusLabel }}
+            </span>
+          </div>
+
+          <div class="form-grid security-grid">
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <p-password formControlName="password" [toggleMask]="true" [feedback]="false" styleClass="w-full" placeholder="Enter new password"></p-password>
+              <small class="field-error" *ngIf="showPasswordLengthError">New password must be at least 6 characters.</small>
+              <small class="field-error" *ngIf="showNewPasswordRequiredError">Enter a new password before confirming the reset.</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" placeholder="Re-enter new password"></p-password>
+              <small class="field-error" *ngIf="showConfirmPasswordRequiredError">Confirm the new password before saving.</small>
+              <small class="field-error" *ngIf="showConfirmPasswordMismatchError">New password and confirm password must match.</small>
+            </div>
           </div>
         </div>
 

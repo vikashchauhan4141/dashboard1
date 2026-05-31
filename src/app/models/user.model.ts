@@ -29,6 +29,14 @@ export interface UserResponse {
   data: User;
 }
 
+export interface AdminUpdatePayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  isActive?: boolean;
+  password?: string;
+}
+
 export interface UserListResponse {
   success: boolean;
   data: User[];

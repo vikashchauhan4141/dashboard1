@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { SuperAdminService } from '../../../services/super-admin.service';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -14,7 +14,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil, timeout } from 'rxjs/operators';
-import { User } from '../../../models/user.model';
+import { AdminUpdatePayload, User } from '../../../models/user.model';
 
 @Component({
   selector: 'app-admin-management',
@@ -67,7 +67,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
 
   get dialogSubtitle(): string {
     return this.isEditMode
-      ? 'Review contact details and access status before saving changes.'
+      ? 'Review contact details, access status, and reset the password if needed before saving changes.'
       : 'Add a new admin with secure sign-in credentials for your team.';
   }
 
@@ -88,14 +88,51 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
     return name ? name.charAt(0).toUpperCase() : 'A';
   }
 
+  get passwordResetRequested(): boolean {
+    if (!this.isEditMode) {
+      return false;
+    }
+
+    const password = `${this.adminForm.get('password')?.value ?? ''}`;
+    const confirmPassword = `${this.adminForm.get('confirmPassword')?.value ?? ''}`;
+    return !!password || !!confirmPassword;
+  }
+
+  get passwordResetStatusLabel(): string {
+    return this.passwordResetRequested ? 'Pending Reset' : 'Optional';
+  }
+
+  get showPasswordLengthError(): boolean {
+    const passwordControl = this.adminForm.get('password');
+    return !!passwordControl?.touched && !!passwordControl.errors?.['minlength'];
+  }
+
+  get showNewPasswordRequiredError(): boolean {
+    return this.hasPasswordResetError('passwordResetPasswordRequired');
+  }
+
+  get showConfirmPasswordRequiredError(): boolean {
+    return this.hasPasswordResetError('passwordResetConfirmationRequired');
+  }
+
+  get showConfirmPasswordMismatchError(): boolean {
+    return this.hasPasswordResetError('passwordResetMismatch');
+  }
+
   initForm(): void {
-    this.adminForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      isActive: [true]
-    });
+    this.adminForm = this.fb.group(
+      {
+        name: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        phone: ['', Validators.required],
+        password: ['', [Validators.required, Validators.minLength(8)]],
+        confirmPassword: [''],
+        isActive: [true]
+      },
+      {
+        validators: this.passwordResetValidator.bind(this)
+      }
+    );
     this.configureFormForCreate();
   }
 
@@ -229,11 +266,15 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
       email: '',
       phone: '',
       password: '',
+      confirmPassword: '',
       isActive: true
     });
     this.adminForm.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
     this.adminForm.get('password')?.updateValueAndValidity();
+    this.adminForm.get('confirmPassword')?.clearValidators();
+    this.adminForm.get('confirmPassword')?.updateValueAndValidity();
     this.adminForm.get('isActive')?.disable({ emitEvent: false });
+    this.adminForm.updateValueAndValidity({ emitEvent: false });
   }
 
   private configureFormForEdit(): void {
@@ -242,12 +283,17 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
       email: '',
       phone: '',
       password: '',
+      confirmPassword: '',
       isActive: true
     });
-    this.adminForm.get('password')?.clearValidators();
+    this.adminForm.get('password')?.setValidators([Validators.minLength(6)]);
     this.adminForm.get('password')?.setValue('');
     this.adminForm.get('password')?.updateValueAndValidity();
+    this.adminForm.get('confirmPassword')?.clearValidators();
+    this.adminForm.get('confirmPassword')?.setValue('');
+    this.adminForm.get('confirmPassword')?.updateValueAndValidity();
     this.adminForm.get('isActive')?.enable({ emitEvent: false });
+    this.adminForm.updateValueAndValidity({ emitEvent: false });
   }
 
   private fetchAdminDetails(adminId: string): void {
@@ -285,6 +331,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
             email: admin.email ?? '',
             phone: admin.phone ?? '',
             password: '',
+            confirmPassword: '',
             isActive: admin.isActive !== false
           });
         },
@@ -372,18 +419,19 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
       });
   }
 
-  private buildUpdatePayload(): Partial<User> {
+  private buildUpdatePayload(): AdminUpdatePayload {
     const rawValue = this.adminForm.getRawValue();
     const original = this.selectedAdmin;
     if (!original) {
       return {};
     }
 
-    const payload: Partial<User> = {};
+    const payload: AdminUpdatePayload = {};
     const normalizedName = `${rawValue.name ?? ''}`.trim();
     const normalizedEmail = `${rawValue.email ?? ''}`.trim();
     const normalizedPhone = `${rawValue.phone ?? ''}`.trim();
     const normalizedStatus = rawValue.isActive !== false;
+    const nextPassword = `${rawValue.password ?? ''}`;
 
     if (normalizedName !== (original.name ?? '')) {
       payload.name = normalizedName;
@@ -401,7 +449,48 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
       payload.isActive = normalizedStatus;
     }
 
+    if (nextPassword) {
+      payload.password = nextPassword;
+    }
+
     return payload;
+  }
+
+  private hasPasswordResetError(errorKey: string): boolean {
+    if (!this.isEditMode || !this.adminForm.errors?.[errorKey]) {
+      return false;
+    }
+
+    const passwordTouched = !!this.adminForm.get('password')?.touched;
+    const confirmPasswordTouched = !!this.adminForm.get('confirmPassword')?.touched;
+    return passwordTouched || confirmPasswordTouched;
+  }
+
+  private passwordResetValidator(control: AbstractControl): ValidationErrors | null {
+    if (!this.isEditMode) {
+      return null;
+    }
+
+    const password = `${control.get('password')?.value ?? ''}`;
+    const confirmPassword = `${control.get('confirmPassword')?.value ?? ''}`;
+
+    if (!password && !confirmPassword) {
+      return null;
+    }
+
+    if (!password && confirmPassword) {
+      return { passwordResetPasswordRequired: true };
+    }
+
+    if (password && !confirmPassword) {
+      return { passwordResetConfirmationRequired: true };
+    }
+
+    if (password !== confirmPassword) {
+      return { passwordResetMismatch: true };
+    }
+
+    return null;
   }
 
   private resetDialogState(): void {
