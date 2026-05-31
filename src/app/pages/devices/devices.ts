@@ -90,7 +90,7 @@ export class Devices implements OnInit {
 
   loadDevices(): void {
     this.loading.set(true);
-    this.deviceService.getDevices().subscribe({
+    this.deviceService.getDevices('', 1, 1000).subscribe({
       next: (res) => {
         this.devices.set(res.data);
         this.totalRecords.set(res.total);
