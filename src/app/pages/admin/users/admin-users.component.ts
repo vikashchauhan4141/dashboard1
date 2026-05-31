@@ -111,7 +111,7 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
       company: user.company || '',
       isActive: user.isActive !== false
     });
-    this.userForm.get('password')?.clearValidators();
+    this.userForm.get('password')?.setValidators([Validators.minLength(8)]);
     this.userForm.get('password')?.updateValueAndValidity();
     this.displayDialog = true;
   }
@@ -127,9 +127,13 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
     }
 
     this.saving = true;
-    const data = this.userForm.value;
+    const data = { ...this.userForm.value };
 
     if (this.editingId) {
+      // For Edit, if password is empty, remove it from payload
+      if (!data.password || !data.password.trim()) {
+        delete data.password;
+      }
       // Edit User
       this.adminService.updateUser(this.editingId, data)
         .pipe(takeUntil(this.destroy$))
